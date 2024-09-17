@@ -1,9 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:mynewappmynotes/Components/EmailVertification.dart';
-import 'package:mynewappmynotes/constants/routes.dart';
+import 'package:mynewappmynotes/Components/ReRouter.dart';
+import 'package:mynewappmynotes/Services/Auth/Authservice.dart';
+import 'package:mynewappmynotes/Services/Auth/FireBaseAuth.dart';
 import '../Components/PasswordAndEmail.dart';
+import 'package:mynewappmynotes/Services/Auth/auth_exceptions.dart';
+import 'package:mynewappmynotes/Components/Toast.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -35,47 +36,33 @@ class _RegisterViewState extends State<RegisterView> {
                     backgroundColor: WidgetStatePropertyAll<Color>(
                         Color.fromRGBO(0, 161, 230, 1))),
                 onPressed: () async {
-                  final email = _passwordAndEmailKey.currentState!.getEmail();
-                  final password =
-                      _passwordAndEmailKey.currentState!.getPassword();
                   try {
-                    await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                        email: email, password: password);
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const EmailVerification()));
-                  } on FirebaseAuthException catch (e) {
-                    print(e.code);
-                    print("error");
+                    final email = _passwordAndEmailKey.currentState!.getEmail();
+                    final password =
+                        _passwordAndEmailKey.currentState!.getPassword();
 
-                    String messsag = "Email or password is incorrect";
-                    switch (e.code) {
-                      case "email-already-in-use":
-                        messsag = "email already in use";
-                        break;
-                      case "invalid-email":
-                        messsag = "please enter a valid email";
-                        break;
-                      case "weak-password":
-                        messsag =
-                            "password must contain uppercase and lowercase letters and numbers";
-                        break;
-                    }
-                    Fluttertoast.showToast(
-                        msg: messsag,
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.TOP,
-                        timeInSecForIosWeb: 3,
-                        backgroundColor: const Color.fromARGB(165, 255, 0, 0),
-                        textColor: const Color.fromARGB(255, 255, 255, 255),
-                        fontSize: 16.0);
+                    final Authservice authservice =
+                        Authservice(FirebBaseAuth());
+                    await authservice.CreateUser(
+                      email: email,
+                      password: password,
+                    );
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => ReRouter()));
+                  } on AuthExceptions catch (e) {
+                    toast(e.toString());
+                  } catch (e) {
+                    toast(e.toString());
                   }
                 },
                 child: const Text("register", style: TextStyle(fontSize: 20)),
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.of(context)
-                      .pushNamedAndRemoveUntil(loginRoute, (route) => false);
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (context) => routes.getLoginRoute(context)),
+                      (route) => false);
                 },
                 child: const Text("Already have an account?"),
               ),

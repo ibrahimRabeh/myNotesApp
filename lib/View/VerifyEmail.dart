@@ -1,5 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mynewappmynotes/Components/ReRouter.dart';
+import 'package:mynewappmynotes/Components/Toast.dart';
+import 'package:mynewappmynotes/Services/Auth/Authservice.dart';
+import 'package:mynewappmynotes/Services/Auth/FireBaseAuth.dart';
 
 class VerifyEmail extends StatefulWidget {
   const VerifyEmail({super.key});
@@ -9,8 +12,14 @@ class VerifyEmail extends StatefulWidget {
 }
 
 class _VerifyEmailState extends State<VerifyEmail> {
+  sendAuth() async {
+    final user = Authservice(FirebBaseAuth());
+    user.SendEmailVerification();
+  }
+
   @override
   Widget build(BuildContext context) {
+    sendAuth();
     return Scaffold(
       appBar: AppBar(
         title: const Text("Verify Email"),
@@ -24,12 +33,23 @@ class _VerifyEmailState extends State<VerifyEmail> {
             const Text("Please verify your email"),
             ElevatedButton(
               onPressed: () async {
-                final user = FirebaseAuth.instance.currentUser;
-                await user!.sendEmailVerification();
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil('/loginView', (route) => false);
+                final user = await Authservice(FirebBaseAuth());
+                user.reload();
+                toast("Please check your email", color: Colors.grey);
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => ReRouter()),
+                    (route) => false);
               },
-              child: const Text("Send verification email"),
+              child: const Text("Verify Email"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (context) => routes.getRegisterRoute(context)),
+                    (route) => false);
+              },
+              child: const Text("Change Email?"),
             ),
           ],
         ),

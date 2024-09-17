@@ -1,9 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-import '../constants/routes.dart';
+import 'package:mynewappmynotes/Services/Auth/Authservice.dart';
+import 'package:mynewappmynotes/Services/Auth/FireBaseAuth.dart';
+import 'package:mynewappmynotes/constants/routes.dart';
 
 Future<bool> LogoutPopup(BuildContext context) {
+  Routes routes = Routes();
   return showDialog(
     context: context,
     builder: (context) {
@@ -19,10 +20,12 @@ Future<bool> LogoutPopup(BuildContext context) {
           ),
           TextButton(
             onPressed: () {
-              Navigator.of(context)
-                  .pushNamedAndRemoveUntil(loginRoute, (route) => false);
+              Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                      builder: (context) => routes.getLoginRoute(context)),
+                  (route) => false);
 
-              FirebaseAuth.instance.signOut();
+              Authservice(FirebBaseAuth()).LogOut();
             },
             child: Text("Logout"),
           ),

@@ -1,10 +1,14 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:mynewappmynotes/Components/EmailVertification.dart';
-import 'package:mynewappmynotes/View/RegisterView.dart';
-import 'package:mynewappmynotes/constants/routes.dart';
+import 'package:mynewappmynotes/Components/HandleSigninUpErrors.dart';
+import 'package:mynewappmynotes/Components/ReRouter.dart';
+import 'package:mynewappmynotes/Components/Toast.dart';
+import 'package:mynewappmynotes/Services/Auth/Authservice.dart';
+import 'package:mynewappmynotes/Services/Auth/FireBaseAuth.dart';
+import 'package:mynewappmynotes/Services/Auth/auth_exceptions.dart';
 import '../Components/PasswordAndEmail.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class loginView extends StatefulWidget {
   const loginView({Key? key}) : super(key: key);
@@ -16,7 +20,6 @@ class loginView extends StatefulWidget {
 class _loginViewState extends State<loginView> {
   final GlobalKey<PasswordandEmailState> _passwordAndEmailKey =
       GlobalKey<PasswordandEmailState>();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,38 +40,22 @@ class _loginViewState extends State<loginView> {
                     backgroundColor: WidgetStatePropertyAll<Color>(
                         Color.fromRGBO(0, 161, 230, 1))),
                 onPressed: () async {
-                  String email = _passwordAndEmailKey.currentState!.getEmail();
-                  String password =
-                      _passwordAndEmailKey.currentState!.getPassword();
                   try {
-                    await FirebaseAuth.instance.signInWithEmailAndPassword(
-                        email: email, password: password);
+                    String email =
+                        _passwordAndEmailKey.currentState!.getEmail();
+                    String password =
+                        _passwordAndEmailKey.currentState!.getPassword();
+                    final Authservice authservice =
+                        Authservice(FirebBaseAuth());
+                    await authservice.LogIn(email: email, password: password);
                     Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(
-                            builder: (context) => const EmailVerification()),
+                            builder: (context) => const ReRouter()),
                         (route) => false);
-                  } on FirebaseAuthException catch (e) {
-                    String message = e.code;
-
-                    switch (e.code) {
-                      case "channel-error":
-                        message = "please fill in password and email";
-                        break;
-                      case "network-request-failed":
-                        message = "check internet connection";
-                        break;
-                      default:
-                        message = "something went wrong";
-                    }
-
-                    Fluttertoast.showToast(
-                        msg: message,
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.TOP,
-                        timeInSecForIosWeb: 1,
-                        backgroundColor: const Color.fromARGB(165, 255, 0, 0),
-                        textColor: const Color.fromARGB(255, 255, 255, 255),
-                        fontSize: 16.0);
+                  } on AuthExceptions catch (e) {
+                    toast(e.toString());
+                  } catch (e) {
+                    toast(e.toString());
                   }
                 },
                 child: const Text(
@@ -79,7 +66,9 @@ class _loginViewState extends State<loginView> {
               TextButton(
                   onPressed: () {
                     Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (context) => RegisterView()),
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                routes.getRegisterRoute(context)),
                         (Route) => false);
                   },
                   child: const Text("Don't have an account? Register here"))

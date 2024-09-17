@@ -1,19 +1,21 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:mynewappmynotes/View/VerifyEmail.dart';
-import 'package:mynewappmynotes/View/loginView.dart';
-import 'package:mynewappmynotes/View/myNotesMainPage.dart';
+import 'package:mynewappmynotes/constants/routes.dart';
 import 'package:mynewappmynotes/firebase_options.dart';
 
-class EmailVerification extends StatefulWidget {
-  const EmailVerification({super.key});
+class ReRouter extends StatefulWidget {
+  const ReRouter({super.key});
 
   @override
-  _EmailVerificationState createState() => _EmailVerificationState();
+  _ReRouterState createState() => _ReRouterState();
 }
 
-class _EmailVerificationState extends State<EmailVerification> {
+final routes = Routes();
+
+class _ReRouterState extends State<ReRouter> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -36,14 +38,15 @@ class _EmailVerificationState extends State<EmailVerification> {
                     } else if (snapshot.hasData) {
                       final user = snapshot.data;
                       if (user == null) {
-                        return const loginView();
+                        return routes.getLoginRoute(context);
                       } else if (user.emailVerified) {
-                        return const Mynotesmainpage();
+                        log("User is verified");
+                        return routes.getMainPage(context);
                       } else {
-                        return const VerifyEmail();
+                        return routes.getVerifyEmail(context);
                       }
                     } else {
-                      return const loginView();
+                      return routes.getLoginRoute(context);
                     }
                   });
             default:
